@@ -1,0 +1,31 @@
+version: "3.7"
+services:
+  monica:
+    image: monica:latest
+    container_name: monica
+    depends_on:
+      - monica-db
+    ports:
+      - 4166:80
+    environment:
+      - APP_KEY= <base64:XXXXXX> # requiere que APP_KEY sea una clave base64 generada específicamente. Puedes generar una clave usando el siguiente comando en el contenedor: "docker exec -it monica php artisan key:generate --show
+      - DB_HOST=monica-db
+      - DB_USERNAME=monica
+      - DB_PASSWORD=YOURPASSWORD_DB # Debe coincidir exactamente con MARIADB_PASSWORD abajo.
+    volumes:
+      - /docker/monica/data:/var/www/html/storage
+    restart: unless-stopped
+
+  monica-db:
+    image: mariadb:latest
+    container_name: monica-db
+    environment:
+      - TZ=Europe/Madrid
+      - MARIADB_RANDOM_ROOT_PASSWORD=false # Cambio importante si necesitas definir la contraseña manualmente.
+      - MARIADB_ROOT_PASSWORD=YOURPASSWORD # Definir si decides deshabilitar MARIADB_RANDOM_ROOT_PASSWORD.
+      - MARIADB_DATABASE=monica
+      - MARIADB_USER=monica
+      - MARIADB_PASSWORD=YOURPASSWORD_DB # Debe coincidir exactamente con DB_PASSWORD arriba.
+    volumes:
+      - /docker/monica/db/mysql:/var/lib/mysql
+    restart: unless-stopped
